@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="myApp">
+<html>
   <head>
     <title>Co-WIN Public appointment availabilty</title>
     <link rel="shortcut icon" type="image/x-icon"
@@ -85,15 +85,135 @@
   </head>
 
   <body>
-    <div ng-view></div>
+    <!-- <div ng-view></div> -->
 
+    <div ng-app="myApp" ng-controller="myCtrl">
+      <div class="form-group">
+        <label for="sel1">
+          <h3>Select Your District:</h3>
+        </label>
+        <select
+          class="form-control"
+          id="sel1"
+          ng-model="selectedDistrict"
+          ng-change="listCentersByDistrict(selectedDistrict)"
+        >
+          <option ng-repeat="district in districts" value="{{district}}">
+            {{district.district_name}}
+          </option>
+        </select>
+      </div>
+
+      <div class="container">
+        <center ng-if="showText">
+          <h2 class="headline text-success">
+            <b>Vaccine Centers in {{showText}} : {{vaccineCenters.length}}</b>
+          </h2>
+        </center>
+        <div
+          class="panel-group"
+          id="accordion"
+          ng-repeat="center in vaccineCenters track by $index"
+        >
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a
+                  data-toggle="collapse"
+                  data-parent="#accordion"
+                  href="#collapse-{{$index}}"
+                  >{{center.block_name}} - {{center.name}}</a
+                >
+              </h4>
+            </div>
+            <div id="collapse-{{$index}}" class="panel-collapse collapse">
+              <div class="panel-body">
+                <strong>Timings:</strong>
+                <b class="text-primary">Morning {{center.from |date}} </b> To
+                <b class="text-primary">Evening {{center.to}}</b><br />
+                <strong>Fee:</strong>
+                <b class="text-primary">{{center.fee_type}}</b> <br /><br />
+                <ul class="list-group">
+                  <li class="list-group-item text-primary">
+                    Vaccine: <b>{{center.sessions[0].vaccine}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Minimum Age: <b>{{center.sessions[0].min_age_limit}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Total Capacity:
+                    <b>{{center.sessions[0].available_capacity}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Dose 1 Availability:
+                    <b>{{center.sessions[0].available_capacity_dose1}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Dose 2 Availability:
+                    <b>{{center.sessions[0].available_capacity_dose2}}</b>
+                  </li>
+                  <li class="list-group-item text-success slot-times">
+                    <p>Slots:</p>
+                    <br /><b>{{center.sessions[0].slots}}</b>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
-    <!-- App Config and Routing Scripts -->
-    <script src="js/app.js"></script>
-    <!-- Home Module -->
-    <script src="js/controllers/HomeController.js"></script>
+    <script>
+      var app = angular.module("myApp", ["ngRoute"]);
+      app.config(function ($routeProvider) {
+        $routeProvider.when("/", {
+          template: "<p>You are on Main Page</p>",
+        });
+      });
+
+      app.controller("myCtrl", function ($scope, $http, $filter) {
+        "use strict";
+
+        const TODAY = $filter("date")(Date.now(), "dd-MM-yyyy");
+
+        $scope.vaccineCenters = [];
+        $scope.selectedDistrict = {};
+        $scope.showText = false;
+
+        fetch("https://cdn-api.co-vin.in/api/v2/admin/location/districts/2")
+          .then((x) => x.json())
+          .then((d) => ($scope.districts = d.districts));
+
+        function getVaccineCentersByDistrict(id) {
+          $http
+            .get(
+              "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=" +
+                id +
+                "&date=" +
+                TODAY
+            )
+            .then((d) => {
+              if (d.data.centers && d.data.centers.length) {
+                d.data.centers.forEach((ctr) => {
+                  ctr.sessions.forEach((session) => {
+                    session.slots = session.slots.join("\n");
+                  });
+                });
+                $scope.vaccineCenters = d.data.centers || [];
+              }
+            });
+        }
+
+        $scope.listCentersByDistrict = function (id) {
+          const districtChoosen = JSON.parse(id);
+          $scope.showText = districtChoosen.district_name;
+          getVaccineCentersByDistrict(districtChoosen.district_id);
+        };
+      });
+    </script>
   </body>
 </html>
