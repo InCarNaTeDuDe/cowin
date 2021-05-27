@@ -13,17 +13,11 @@
       content="width=device-width,height=device-height,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0"
     />
 
-    <meta
-      name="description"
-      content="Co-WIN find appointment availabilty"
-    />
+    <meta name="description" content="Co-WIN find appointment availabilty" />
 
     <meta name="title" content="Co-WIN find appointment availabilty" />
 
-    <meta
-      property="og:title"
-      content="Co-WIN find appointment availabilty"
-    />
+    <meta property="og:title" content="Co-WIN find appointment availabilty" />
     <meta
       property="og:description"
       content="Co-WIN find appointment availabilty"
@@ -33,10 +27,7 @@
       content="https://www.naviinsurance.com/media/images/BLOG_1060.original.png"
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="Co-WIN find appointment availabilty"
-    />
+    <meta name="twitter:title" content="Co-WIN find appointment availabilty" />
     <meta
       name="twitter:description"
       content="Co-WIN find appointment availabilty"
@@ -84,21 +75,11 @@
       }
     </style>
   </head>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
   <body>
+    <div ng-view></div>
+
     <div ng-app="myApp" ng-controller="myCtrl">
-      <!-- <select
-        ng-model="selectedDistrict"
-        ng-change="listCentersByDistrict(selectedDistrict)"
-      >
-        <option
-          ng-repeat="district in districts"
-          value="{{district.district_id}}"
-        >
-          {{district.district_name}}
-        </option>
-      </select>
-   -->
       <div class="container">
         <h2 class="headline text-success">CoWin Availability Centers</h2>
         <div
@@ -156,8 +137,15 @@
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
     <script>
-      var app = angular.module("myApp", []);
+      var app = angular.module("myApp", ["ngRoute"]);
+      app.config(function ($routeProvider) {
+        $routeProvider.when("/", {
+          template: "<p>You are on Main Page</p>",
+        });
+      });
 
       app.controller("myCtrl", function ($scope, $http, $filter) {
         "use strict";
