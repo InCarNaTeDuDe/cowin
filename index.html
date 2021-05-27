@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Co-WIN Public appointment availabilty</title>
+    <link rel="shortcut icon" type="image/x-icon"
+    href="https://www.naviinsurance.com/media/images/BLOG_1060.original.png" "
+    /> <link rel="icon" type="image/ico"
+    href="https://www.naviinsurance.com/media/images/BLOG_1060.original.png" "
+    />
+
+    <meta
+      name="viewport"
+      content="width=device-width,height=device-height,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0"
+    />
+
+    <meta
+      name="description"
+      content="Co-WIN find appointment availabilty"
+    />
+
+    <meta name="title" content="Co-WIN find appointment availabilty" />
+
+    <meta
+      property="og:title"
+      content="Co-WIN find appointment availabilty"
+    />
+    <meta
+      property="og:description"
+      content="Co-WIN find appointment availabilty"
+    />
+    <meta
+      property="og:image"
+      content="https://www.naviinsurance.com/media/images/BLOG_1060.original.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Co-WIN find appointment availabilty"
+    />
+    <meta
+      name="twitter:description"
+      content="Co-WIN find appointment availabilty"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
+    <link rel="preload" href="https://fonts.googleapis.com" as="font" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Lato"
+      rel="stylesheet"
+    />
+
+    <style>
+      .headline {
+        font-size: clamp(20px, 24px, 5vw);
+      }
+
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      td,
+      th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+
+      .slot-times {
+        white-space: pre;
+      }
+
+      .slot-times p {
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+  <body>
+    <div ng-app="myApp" ng-controller="myCtrl">
+      <!-- <select
+        ng-model="selectedDistrict"
+        ng-change="listCentersByDistrict(selectedDistrict)"
+      >
+        <option
+          ng-repeat="district in districts"
+          value="{{district.district_id}}"
+        >
+          {{district.district_name}}
+        </option>
+      </select>
+   -->
+      <div class="container">
+        <h2 class="headline text-success">CoWin Availability Centers</h2>
+        <div
+          class="panel-group"
+          id="accordion"
+          ng-repeat="center in vaccineCenters track by $index"
+        >
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a
+                  data-toggle="collapse"
+                  data-parent="#accordion"
+                  href="#collapse-{{$index}}"
+                  >{{center.block_name}} - {{center.name}}</a
+                >
+              </h4>
+            </div>
+            <div id="collapse-{{$index}}" class="panel-collapse collapse">
+              <div class="panel-body">
+                <strong>Timings:</strong>
+                <b class="text-primary">Morning {{center.from |date}} </b> To
+                <b class="text-primary">Evening {{center.to}}</b><br />
+                <strong>Fee:</strong>
+                <b class="text-primary">{{center.fee_type}}</b> <br /><br />
+                <ul class="list-group">
+                  <li class="list-group-item text-primary">
+                    Vaccine: <b>{{center.sessions[0].vaccine}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Minimum Age: <b>{{center.sessions[0].min_age_limit}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Total Capacity:
+                    <b>{{center.sessions[0].available_capacity}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Dose 1 Availability:
+                    <b>{{center.sessions[0].available_capacity_dose1}}</b>
+                  </li>
+                  <li class="list-group-item text-primary">
+                    Dose 2 Availability:
+                    <b>{{center.sessions[0].available_capacity_dose2}}</b>
+                  </li>
+                  <li class="list-group-item text-success slot-times">
+                    <p>Slots:</p>
+                    <br /><b>{{center.sessions[0].slots}}</b>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+      var app = angular.module("myApp", []);
+
+      app.controller("myCtrl", function ($scope, $http, $filter) {
+        "use strict";
+
+        const TODAY = $filter("date")(Date.now(), "dd-MM-yyyy");
+
+        $scope.vaccineCenters = [];
+
+        // fetch("https://cdn-api.co-vin.in/api/v2/admin/location/districts/2")
+        //   .then((x) => x.json())
+        //   .then((d) => ($scope.districts = d.districts));
+
+        $http
+          .get(
+            "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=12&date=" +
+              TODAY
+          )
+          .then((d) => {
+            if (d.data.centers && d.data.centers.length) {
+              d.data.centers.forEach((ctr) => {
+                ctr.sessions.forEach((session) => {
+                  session.slots = session.slots.join("\n");
+                });
+              });
+              $scope.vaccineCenters = d.data.centers || [];
+            }
+          });
+      });
+    </script>
+  </body>
+</html>
