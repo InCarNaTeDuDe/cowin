@@ -37,13 +37,21 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
     />
-    <link rel="preload" href="https://fonts.googleapis.com" as="font" />
+
     <link
       href="https://fonts.googleapis.com/css?family=Lato"
       rel="stylesheet"
     />
 
     <style>
+      * {
+        font-family: "Lato", sans-serif;
+      }
+
+      body {
+        margin: 0 20px;
+      }
+
       .headline {
         font-size: clamp(20px, 24px, 5vw);
       }
@@ -77,11 +85,31 @@
   </head>
 
   <body>
-    <div ng-view></div>
+    <!-- <div ng-view></div> -->
 
     <div ng-app="myApp" ng-controller="myCtrl">
+      <div class="form-group">
+        <label for="sel1">
+          <h3>Select Your District:</h3>
+        </label>
+        <select
+          class="form-control"
+          id="sel1"
+          ng-model="selectedDistrict"
+          ng-change="listCentersByDistrict(selectedDistrict)"
+        >
+          <option ng-repeat="district in districts" value="{{district}}">
+            {{district.district_name}}
+          </option>
+        </select>
+      </div>
+
       <div class="container">
-        <h2 class="headline text-success">CoWin Availability Centers</h2>
+        <center ng-if="showText">
+          <h2 class="headline text-success">
+            <b>Vaccine Centers in {{showText}} : {{vaccineCenters.length}}</b>
+          </h2>
+        </center>
         <div
           class="panel-group"
           id="accordion"
@@ -153,26 +181,38 @@
         const TODAY = $filter("date")(Date.now(), "dd-MM-yyyy");
 
         $scope.vaccineCenters = [];
+        $scope.selectedDistrict = {};
+        $scope.showText = false;
 
-        // fetch("https://cdn-api.co-vin.in/api/v2/admin/location/districts/2")
-        //   .then((x) => x.json())
-        //   .then((d) => ($scope.districts = d.districts));
+        fetch("https://cdn-api.co-vin.in/api/v2/admin/location/districts/2")
+          .then((x) => x.json())
+          .then((d) => ($scope.districts = d.districts));
 
-        $http
-          .get(
-            "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=12&date=" +
-              TODAY
-          )
-          .then((d) => {
-            if (d.data.centers && d.data.centers.length) {
-              d.data.centers.forEach((ctr) => {
-                ctr.sessions.forEach((session) => {
-                  session.slots = session.slots.join("\n");
+        function getVaccineCentersByDistrict(id) {
+          $http
+            .get(
+              "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=" +
+                id +
+                "&date=" +
+                TODAY
+            )
+            .then((d) => {
+              if (d.data.centers && d.data.centers.length) {
+                d.data.centers.forEach((ctr) => {
+                  ctr.sessions.forEach((session) => {
+                    session.slots = session.slots.join("\n");
+                  });
                 });
-              });
-              $scope.vaccineCenters = d.data.centers || [];
-            }
-          });
+                $scope.vaccineCenters = d.data.centers || [];
+              }
+            });
+        }
+
+        $scope.listCentersByDistrict = function (id) {
+          const districtChoosen = JSON.parse(id);
+          $scope.showText = districtChoosen.district_name;
+          getVaccineCentersByDistrict(districtChoosen.district_id);
+        };
       });
     </script>
   </body>
