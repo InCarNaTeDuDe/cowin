@@ -98,7 +98,7 @@
           ng-model="selectedDistrict"
           ng-change="listCentersByDistrict(selectedDistrict)"
         >
-          <option ng-repeat="district in districts" value="{{district}}">
+          <option ng-repeat="district in districts track by $index" value="{{district}}">
             {{district.district_name}}
           </option>
         </select>
