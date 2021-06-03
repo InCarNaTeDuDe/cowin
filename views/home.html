@@ -1,4 +1,4 @@
-<div class="form-group">
+<!-- <div class="form-group">
   <label for="sel1">
     <h3>Select Your District:</h3>
   </label>
@@ -15,18 +15,48 @@
       {{district.district_name}}
     </option>
   </select>
-</div>
-
+</div> -->
 <div class="container">
-  <center ng-if="showText">
+  <br />
+  <button class="btn btn-primary" ng-click="kangiri()">
+    <span class="blink">VACCINE AREAS IN KANIGIRI</span class="blink">
+      
+  </button>
+  <img src="http://www.vidyaposhak.ngo/wp-content/uploads/2017/10/new.gif" alt="new" height="45" width="80">
+<br />
+  <form>
+    <div class="radio">
+      <label class="radio-inline"
+        ><h4>
+          <input
+            type="radio"
+            ng-init="selectedVaccine=''"
+            value="COVAXIN"
+            ng-model="selectedVaccine"
+          />
+          COVAXIN
+        </h4></label
+      >
+      <label class="radio-inline"
+        ><h4>
+          <input type="radio" value="COVISHIELD" ng-model="selectedVaccine" />
+          COVAXIN/COVISHIELD
+        </h4></label
+      >
+    </div>
+  </form>
+</div>
+<div class="container">
+  <center>
     <h2 class="headline text-success">
-      <b>Vaccine Centers in {{showText}} : {{vaccineCenters.length}}</b>
+      <b>Vaccine Centers in {{city}} : {{vaccineCenters.length}}</b>
     </h2>
   </center>
+
   <div
     class="panel-group"
     id="accordion"
-    ng-repeat="center in vaccineCenters track by $index"
+    ng-repeat="center in vaccineCenters | filter: selectedVaccine"
   >
     <div class="panel panel-primary">
       <div class="panel-heading">
@@ -37,6 +67,7 @@
             ng-click="toggle($index)"
             >{{center.block_name}} - {{center.name}}</a
           >
+
         </h4>
       </div>
       <div id="collapse-{{$index}}" class="panel-collapse collapse">

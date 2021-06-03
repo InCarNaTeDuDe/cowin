@@ -7,10 +7,13 @@
       "use strict";
 
       const TODAY = $filter("date")(Date.now(), "dd-MM-yyyy");
+      var wholeData = [];
 
       $scope.vaccineCenters = [];
       $scope.selectedDistrict = {};
-      $scope.showText = false;
+      // $scope.showText = false;
+      $scope.city = "Ongole";
+      $scope.covaxinAreas = [];
 
       $scope.districts = [
         { district_id: 9, district_name: "Anantapur" },
@@ -46,16 +49,19 @@
                   session.slots = session.slots.join("\n");
                 });
               });
-              $scope.vaccineCenters = d.data.centers || [];
+              wholeData = d.data.centers;
+
+              $scope.vaccineCenters =
+                d.data.centers.filter((o) => o.block_name === "Ongole") || [];
             }
           });
       }
 
-      $scope.listCentersByDistrict = function (id) {
-        const districtChoosen = JSON.parse(id);
-        $scope.showText = districtChoosen.district_name;
-        getVaccineCentersByDistrict(districtChoosen.district_id);
-      };
+      // $scope.listCentersByDistrict = function (id) {
+      //   const districtChoosen = JSON.parse(id);
+      //   $scope.showText = districtChoosen.district_name;
+      //   getVaccineCentersByDistrict(districtChoosen.district_id);
+      // };
 
       $scope.toggle = function (id) {
         var divId = id++;
@@ -69,5 +75,31 @@
           angular.element(selector).addClass("in");
         }
       };
+
+      $scope.findByVaccine = function (vaccine) {
+        const data = angular.copy($scope.vaccineCenters);
+        $scope.vaccineCenters.length = 0;
+
+        data.forEach((c) =>
+          c.sessions.filter((s) => {
+            if (s.vaccine === vaccine) {
+              $scope.covaxinAreas.push(c);
+            }
+          })
+        );
+      };
+
+      $scope.clearCovaxinData = function () {
+        $scope.covaxinAreas.length = 0;
+      };
+
+      $scope.kangiri = function () {
+        $scope.city = "Kanigiri";
+        $scope.vaccineCenters.length = 0;
+        $scope.vaccineCenters =
+          wholeData.filter((o) => o.block_name === "Kanigiri") || [];
+      };
+
+      getVaccineCentersByDistrict(12);
     });
 })();
